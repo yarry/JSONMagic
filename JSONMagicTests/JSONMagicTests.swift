@@ -16,6 +16,48 @@ class JSONMagicTests: XCTestCase {
         return JSON(data:jsonString.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)!)!
     }
     
+    func testExample() {
+        
+        struct Leaf : JSONDecodable {
+            var name: String
+            var identifier: Int
+            var date: NSDate
+            
+            static func decodeJSON(json: JSON) -> Result<Leaf> {
+                var name: String!
+                var identifier: Int!
+                var date: NSDate!
+                
+                return JSONDecoder(json)
+                    .optionalBind(&name,"name",fallback: "Unnamed")
+                    .bind(&identifier,"id")
+                    .bind(&date,"timestamp") { NSDate(timeIntervalSince1970: $0) }
+                    .result(Leaf(name: name, identifier:identifier, date: date))
+            }
+        }
+
+        final class Root : NSObject, JSONMutableDecodable {
+            var title:String = ""
+            var leafs:[Leaf] = []
+            var date:NSDate? = nil
+            
+            func mutateByJSON(json: JSON) -> Result<Root> {
+                return JSONDecoder(json)
+                    .bind(&title,"title")
+                    .optionalBind(&leafs,"leafs",fallback: [])
+                    .optionalBind(&date,"timestamp") { NSDate(timeIntervalSince1970: $0) }
+                    .result(self)
+            }
+        }
+
+        let json:JSON = jsonFromString("{'title':'s','leafs':[]}")
+
+        var root = Root()
+        let result = root.mutateByJSON(json)
+
+        XCTAssert(result.isSuccess())
+    }
+    
     func testArray() {
         
         let json:JSON = jsonFromString("{'strArray':['a','b']}")

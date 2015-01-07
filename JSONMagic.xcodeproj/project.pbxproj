@@ -13,6 +13,7 @@
 		55FBB4811A5CB1EA00CBA3BE /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FBB47E1A5CB1EA00CBA3BE /* JSON.swift */; };
 		55FBB4821A5CB1EA00CBA3BE /* JSONDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FBB47F1A5CB1EA00CBA3BE /* JSONDecoder.swift */; };
 		55FBB4831A5CB1EA00CBA3BE /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FBB4801A5CB1EA00CBA3BE /* Result.swift */; };
+		55FBB48C1A5CC88C00CBA3BE /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FBB48B1A5CC88C00CBA3BE /* CoreData.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +36,7 @@
 		55FBB47E1A5CB1EA00CBA3BE /* JSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
 		55FBB47F1A5CB1EA00CBA3BE /* JSONDecoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONDecoder.swift; sourceTree = "<group>"; };
 		55FBB4801A5CB1EA00CBA3BE /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
+		55FBB48B1A5CC88C00CBA3BE /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55FBB48C1A5CC88C00CBA3BE /* CoreData.framework in Frameworks */,
 				5514F1981A5CAFB500E6536B /* JSONMagic.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -59,6 +62,7 @@
 		5514F1821A5CAFB500E6536B = {
 			isa = PBXGroup;
 			children = (
+				55FBB48B1A5CC88C00CBA3BE /* CoreData.framework */,
 				5514F18E1A5CAFB500E6536B /* JSONMagic */,
 				5514F19B1A5CAFB500E6536B /* JSONMagicTests */,
 				5514F18D1A5CAFB500E6536B /* Products */,
@@ -332,6 +336,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -349,6 +354,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
