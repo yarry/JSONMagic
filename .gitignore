@@ -1,0 +1,28 @@
+# xcode noise
+*.mode1v3
+*.pbxuser
+*.perspective
+*.perspectivev3
+*.pyc
+*~.nib/
+project.xcworkspace/
+xcuserdata/
+
+# osx noise
+.DS_Store
+
+#AppCode
+
+.idea/.name
+.idea/encodings.xml
+.idea/*.iml
+.idea/find.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/scopes/
+.idea/vcs.xml
+.idea/workspace.xml
+.idea/xcode.xml
+.idea/runConfigurations/
+
+
