@@ -6,20 +6,19 @@
 import Foundation
 
 
-public protocol JSONDecodable
-{
+public protocol JSONDecodable {
     class func decodeJSON(json:JSON) -> Result<Self>
 }
 
-public protocol JSONMutable
-{
+public protocol JSONMutable {
     mutating func mutateByJSON(json:JSON) -> Result<Self>
 }
 
-public protocol JSONMutableDecodable : JSONMutable
-{
+public protocol JSONMutableDecodable : JSONMutable {
     init()
 }
+
+// Error handing
 
 public let kJSONDecoderErrorDomain = "JSONDecoder"
 public let kJSONDecoderErrorPath = "JSONDecoderErrorPath"
@@ -30,14 +29,12 @@ public enum JSONDecoderError: Int {
     case InvalidObjectType
 }
 
-
-public struct JSONDecoder
-{
+/// Decodes JSON object fields
+public struct JSONDecoder {
     let json: JSONDictionary
     let error: NSError?
     
     public init(_ json:JSON) {
-        
         if let jsonDictionary = json.asDictionary() {
             self.json = jsonDictionary
         }
@@ -47,7 +44,11 @@ public struct JSONDecoder
         }
     }
     
-    private init(_ json:JSONDictionary, error:NSError) {
+    public init(_ jsonDictionary:JSONDictionary) {
+        self.json = jsonDictionary
+    }
+    
+    private init(_ json:JSONDictionary, error: NSError) {
         self.json = json
         self.error = error
     }
@@ -176,15 +177,16 @@ public struct JSONDecoder
             return JSONDecoder(json,error:JSONDecoder.unknownError())
         }
     }
+}
+
+// Error handing helpers
+extension JSONDecoder {
     
     // Errors
-    
     private static func addContextToError(error:NSError,context:NSString) -> NSError {
         
         var newContext:String
-        
         if let keypath = error.userInfo?[kJSONDecoderErrorPath] as? String {
-            
             if keypath.hasPrefix("[") {
                 newContext = context.stringByAppendingString(keypath)
             }
@@ -209,7 +211,7 @@ public struct JSONDecoder
     
     private static func keyAbsentError(key:String) -> NSError {
         return NSError(domain: kJSONDecoderErrorDomain, code: JSONDecoderError.KeyAbsent.rawValue,
-            userInfo: [kJSONDecoderErrorPath:key,])
+            userInfo: [kJSONDecoderErrorPath:key])
     }
     
     private static func castError(description:NSString? = nil) -> NSError {
@@ -229,7 +231,7 @@ public func decodeJSON<T:JSONMutableDecodable>(json:JSON) -> Result<T> {
     return value.mutateByJSON(json)
 }
 
-public func decodeJSON<T>(json:JSON, transform: (JSON)->Result<T>) -> Result<Array<T>> {
+private func decodeJSONArray<T>(json:JSON, transform: (JSON)->Result<T>) -> Result<Array<T>> {
     
     if let jsonArray = json.asArray() {
         
@@ -253,6 +255,10 @@ public func decodeJSON<T>(json:JSON, transform: (JSON)->Result<T>) -> Result<Arr
     else {
         return failure(JSONDecoder.castError())
     }
+}
+
+public func decodeJSON<T>(json:JSON, transform: (JSON)->Result<T>) -> Result<Array<T>> {
+    return decodeJSONArray(json, transform)
 }
 
 public func decodeJSON<T:JSONDecodable>(json:JSON) -> Result<Array<T>> {
