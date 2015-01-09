@@ -220,18 +220,9 @@ extension JSONDecoder {
     
 }
 
-// Decoding functions
+// container decoding
 
-public func decodeJSON<T:JSONDecodable>(json:JSON) -> Result<T> {
-    return T.decodeJSON(json)
-}
-
-public func decodeJSON<T:JSONMutableDecodable>(json:JSON) -> Result<T> {
-    var value = T()
-    return value.mutateByJSON(json)
-}
-
-private func decodeJSONArray<T>(json:JSON, transform: (JSON)->Result<T>) -> Result<Array<T>> {
+public func decodeJSONArray<T>(json:JSON, transform: (JSON)->Result<T>) -> Result<Array<T>> {
     
     if let jsonArray = json.asArray() {
         
@@ -257,6 +248,87 @@ private func decodeJSONArray<T>(json:JSON, transform: (JSON)->Result<T>) -> Resu
     }
 }
 
+/// Decode JSON dictionary to dictionary
+public func decodeJSONDictionary<Key: Hashable,Value>(json:JSON, transform: (String,JSON)->Result<(Key,Value)>) -> Result<Dictionary<Key,Value>> {
+    
+    if let jsonDictionary = json.asDictionary() {
+        
+        var resultDictionary = [Key:Value]()
+        
+        for (key,jsonValue) in jsonDictionary {
+            let result = transform(key,jsonValue)
+            
+            switch result {
+            case .Failure(let error):
+                return failure(JSONDecoder.addContextToError(error,context:key))
+            case .Success(let boxed):
+                let (key,value) = boxed.unbox
+                resultDictionary[key] = value
+            default:
+                return failure()
+            }
+        }
+        return success(resultDictionary)
+    }
+    else {
+        return failure(JSONDecoder.castError())
+    }
+}
+
+public func mapJSONDictionary<Key: Hashable,Value,TransformedValue: JSONDecodable>(json:JSON, transform: (String,TransformedValue)->(Key,Value)?) -> Result<Dictionary<Key,Value>> {
+    return decodeJSONDictionary(json) { (key:String,jsonValue:JSON)->Result<(Key,Value)> in
+        return TransformedValue.decodeJSON(jsonValue).flatMap { decodedValue in
+            return optionalSuccess(transform(key,decodedValue),error: JSONDecoder.castError())
+        }
+    }
+}
+
+/// Decode JSON dictionary to array
+public func decodeJSONDictionary<T>(json:JSON, transform: (String,JSON)->Result<T>) -> Result<Array<T>> {
+    
+    if let jsonDictionary = json.asDictionary() {
+        
+        var resultArray = [T]()
+        resultArray.reserveCapacity(jsonDictionary.count)
+        
+        for (key,jsonValue) in jsonDictionary {
+            let result = transform(key,jsonValue)
+            
+            switch result {
+            case .Failure(let error):
+                return failure(JSONDecoder.addContextToError(error,context:key))
+            case .Success(let boxed):
+                resultArray.append(boxed.unbox)
+            default:
+                return failure()
+            }
+        }
+        return success(resultArray)
+    }
+    else {
+        return failure(JSONDecoder.castError())
+    }
+}
+
+
+// Decoding functions
+
+public func decodeJSON<T:JSONDecodable>(json:JSON) -> Result<T> {
+    return T.decodeJSON(json)
+}
+
+public func decodeJSON<T:JSONMutableDecodable>(json:JSON) -> Result<T> {
+    var value = T()
+    return value.mutateByJSON(json)
+}
+
+public func mutateByJSON<T:JSONMutable>(inout value:T, json:JSON) -> Result<T> {
+    return value.mutateByJSON(json)
+}
+
+
+// Decoding arrays
+
 public func decodeJSON<T>(json:JSON, transform: (JSON)->Result<T>) -> Result<Array<T>> {
     return decodeJSONArray(json, transform)
 }
@@ -269,8 +341,19 @@ public func decodeJSON<T:JSONMutableDecodable>(json:JSON) -> Result<Array<T>> {
     return decodeJSON(json) { (json:JSON) -> Result<T> in decodeJSON(json) }
 }
 
-public func mutateByJSON<T:JSONMutable>(inout value:T, json:JSON) -> Result<T> {
-    return value.mutateByJSON(json)
+// Decoding dictionaries
+
+public func decodeJSON<T: JSONDecodable>(json:JSON) -> Result<Dictionary<String,T>> {
+    return decodeJSONDictionary(json) { (key:String,jsonValue:JSON)->Result<(String,T)> in
+        return T.decodeJSON(jsonValue).map { (key,$0) }
+    }
+}
+
+public func decodeJSON<T: JSONMutableDecodable>(json:JSON) -> Result<Dictionary<String,T>> {
+    return decodeJSONDictionary(json) { (key:String,jsonValue:JSON)->Result<(String,T)> in
+        var v = T()
+        return v.mutateByJSON(jsonValue).map { (key,$0) }
+    }
 }
 
 // support decodable objects in decoder
@@ -393,28 +476,28 @@ public extension JSONDecoder {
 
 // More magic!
 
-func mapJSON<V:JSONDecodable,T>(json:JSON, transform: (V)->Result<T>) -> Result<T> {
+public func mapJSON<V:JSONDecodable,T>(json:JSON, transform: (V)->Result<T>) -> Result<T> {
     return decodeJSON(json).flatMap { transform($0) }
 }
 
-func mapJSON<V:JSONMutableDecodable,T>(json:JSON, transform: (V)->Result<T>) -> Result<T> {
+public func mapJSON<V:JSONMutableDecodable,T>(json:JSON, transform: (V)->Result<T>) -> Result<T> {
     return decodeJSON(json).flatMap { transform($0) }
 }
 
-func mapJSON<V:JSONDecodable,T>(json:JSON, transform: (V)->T?) -> Result<T> {
+public func mapJSON<V:JSONDecodable,T>(json:JSON, transform: (V)->T?) -> Result<T> {
     return decodeJSON(json).flatMap { optionalSuccess(transform($0),error: JSONDecoder.castError()) }
 }
 
-func mapJSON<V:JSONMutableDecodable,T>(json:JSON, transform: (V)->T?) -> Result<T> {
+public func mapJSON<V:JSONMutableDecodable,T>(json:JSON, transform: (V)->T?) -> Result<T> {
     return decodeJSON(json).flatMap { optionalSuccess(transform($0),error: JSONDecoder.castError()) }
 }
 
-func mapJSON<V:JSONDecodable,T>(json:JSON, transform: (V)->T) -> Result<T> {
-    return decodeJSON(json).flatMap { success(transform($0)) }
+public func mapJSON<V:JSONDecodable,T>(json:JSON, transform: (V)->T) -> Result<T> {
+    return decodeJSON(json).map { transform($0) }
 }
 
-func mapJSON<V:JSONMutableDecodable,T>(json:JSON, transform: (V)->T) -> Result<T> {
-    return decodeJSON(json).flatMap { success(transform($0)) }
+public func mapJSON<V:JSONMutableDecodable,T>(json:JSON, transform: (V)->T) -> Result<T> {
+    return decodeJSON(json).map { transform($0) }
 }
 
 extension JSONDecoder {
