@@ -69,7 +69,7 @@ public struct JSONDecoder {
         if self.error != nil {
             return self
         }
-        if let jsonValue:JSON = json[key] {
+        if let jsonValue = json[key]?.jsonValue() {
             return bindResult(&value,key, transform(jsonValue))
         }
         else  {
@@ -81,7 +81,7 @@ public struct JSONDecoder {
         if self.error != nil {
             return self
         }
-        if let jsonValue:JSON = json[key] {
+        if let jsonValue = json[key]?.jsonValue() {
             return bindResult(&value,key, transform(jsonValue))
         }
         else  {
@@ -93,7 +93,7 @@ public struct JSONDecoder {
         if self.error != nil {
             return self
         }
-        if let jsonValue:JSON = json[key] {
+        if let jsonValue = json[key]?.jsonValue() {
             return bindResult(&value,key, transform(jsonValue))
         }
         else  {
@@ -105,7 +105,7 @@ public struct JSONDecoder {
         if self.error != nil {
             return self
         }
-        if let jsonValue:JSON = json[key] {
+        if let jsonValue = json[key]?.jsonValue() {
             return bindResult(&value,key, transform(jsonValue))
         }
         else  {
@@ -118,7 +118,7 @@ public struct JSONDecoder {
         if self.error != nil {
             return self
         }
-        if let jsonValue:JSON = json[key] {
+        if let jsonValue = json[key]?.jsonValue() {
             return bindResult(&value,key, transform(jsonValue))
         }
         else  {
@@ -131,7 +131,7 @@ public struct JSONDecoder {
         if self.error != nil {
             return self
         }
-        if let jsonValue:JSON = json[key] {
+        if let jsonValue = json[key]?.jsonValue() {
             return bindResult(&value,key, transform(jsonValue))
         }
         else  {

@@ -51,18 +51,27 @@ public enum JSON {
         }
     }
     
-    public func value<A>() -> A? {
+    public func jsonValue() -> JSON? {
+        switch self {
+        case let .JSONNull:
+            return .None
+        default:
+            return self
+        }
+    }
+    
+    public func value<T>() -> T? {
         switch self {
         case let .JSONString(v):
-            return v as? A
+            return v as? T
         case let .JSONNumber(v):
-            return v as? A
+            return v as? T
         case let .JSONNull:
             return .None
         case let .JSONArray(a):
-            return a as? A
+            return a as? T
         case let .JSONDictionary(o):
-            return o as? A
+            return o as? T
         }
     }
     
