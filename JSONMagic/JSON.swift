@@ -103,12 +103,12 @@ public enum JSON {
         return self.value() as Int?
     }
     
-    public subscript(key: String) -> JSON? {
+    public subscript(key: String) -> JSON {
         switch self {
         case let .JSONDictionary(o):
-            return o[key]
+            return o[key] ?? .JSONNull
         default:
-            return .None
+            return .JSONNull
         }
     }
     
@@ -125,12 +125,12 @@ public enum JSON {
         }
     }
     
-    public subscript(index: Int) -> JSON? {
+    public subscript(index: Int) -> JSON {
         switch self {
         case let .JSONArray(a):
             return a[index]
         default:
-            return .None
+            return .JSONNull
         }
     }
 }
