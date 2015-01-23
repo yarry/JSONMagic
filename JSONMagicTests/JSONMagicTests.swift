@@ -13,7 +13,7 @@ class JSONMagicTests: XCTestCase {
     func jsonFromString(string:String) -> JSON {
         let jsonString = string.stringByReplacingOccurrencesOfString("'", withString: "\"", options: .allZeros, range: nil)
         
-        return JSON(data:jsonString.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)!)!
+        return JSON(jsonData:jsonString.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)!)!
     }
     
     func testExample() {
@@ -55,6 +55,46 @@ class JSONMagicTests: XCTestCase {
         var root = Root()
         let result = root.mutateByJSON(json)
 
+        XCTAssert(result.isSuccess())
+    }
+    
+    func testMutable() {
+        
+        struct Root : JSONMutable {
+            var title:String = ""
+            var date:NSDate? = nil
+            
+            static func decodeJSON(json: JSON) -> Result<Root> {
+                var root = Root()
+                return root.mutateByJSON(json)
+            }
+            
+            init() {
+                self = Root(title:"")
+            }
+            
+            init(title:String) {
+                self.title = title
+            }
+
+            mutating func mutateByJSON(json: JSON) -> Result<Root> {
+                return JSONDecoder(json)
+                    .bind(&title,"title")
+                    .optionalBind(&date,"timestamp") { NSDate(timeIntervalSince1970: $0) }
+                    .result(self)
+            }
+        }
+        
+        let json:JSON = jsonFromString("{'s':{'title':'s','leafs':[]}}")
+        
+        var root:Root = Root()
+        var oRoot:Root?
+        var iuoRoot:Root!
+        
+        let result = JSONDecoder(json)
+            .bind(&root,"s")
+            .result(true)
+        
         XCTAssert(result.isSuccess())
     }
     
