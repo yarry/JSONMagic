@@ -100,7 +100,14 @@ public enum JSON {
     }
     
     public func asInt() -> Int? {
-        return self.value() as Int?
+        switch self {
+        case let .JSONString(v):
+            return v.toInt()
+        case let .JSONNumber(v):
+            return v.integerValue
+        default:
+            return nil
+        }
     }
     
     public subscript(key: String) -> JSON {
