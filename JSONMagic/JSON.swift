@@ -26,6 +26,16 @@ public enum JSON {
         }
     }
     
+    public init?(jsonString: String) {
+        
+        if let json = JSON(jsonData:jsonString.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)!) {
+            self = json
+        }
+        else {
+            return nil
+        }
+    }
+    
     public init(jsonObject: AnyObject) {
         
         switch jsonObject {
