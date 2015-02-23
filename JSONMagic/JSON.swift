@@ -87,10 +87,6 @@ public enum JSON {
         return self.value() as String?
     }
     
-    public func asBool() -> Bool? {
-        return self.value() as Bool?
-    }
-    
     public func asDouble() -> Double? {
         return self.value() as Double?
     }
@@ -98,6 +94,23 @@ public enum JSON {
     public func asFloat() -> Float? {
         return self.value() as Float?
     }
+    
+    public func asBool() -> Bool? {
+        switch self {
+        case let .JSONString(v):
+            if let int =  v.toInt() {
+                return int != 0
+            }
+            else {
+                return nil
+            }
+        case let .JSONNumber(v):
+            return v.boolValue
+        default:
+            return nil
+        }
+    }
+    
     
     public func asInt() -> Int? {
         switch self {
