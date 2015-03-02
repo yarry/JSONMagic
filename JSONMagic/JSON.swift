@@ -163,4 +163,23 @@ public enum JSON {
             return .JSONNull
         }
     }
+    
+    public func asNSObject()->AnyObject {
+        switch self {
+        case let .JSONString(v):
+            return v
+        case let .JSONNumber(v):
+            return v
+        case let .JSONNull:
+            return NSNull()
+        case let .JSONArray(a):
+            return a.map{ $0.asNSObject() }
+        case let .JSONDictionary(o):
+            return reduce(o, [String:AnyObject]()) { dict, pair in
+                var d = dict
+                d[pair.0] = pair.1.asNSObject()
+                return d
+            }
+        }
+    }
 }
