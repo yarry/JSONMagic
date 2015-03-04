@@ -8,6 +8,11 @@ import Foundation
 public typealias JSONDictionary = [String:JSON]
 public typealias JSONArray = [JSON]
 
+private let numberFormatter:NSNumberFormatter = {
+    let formatter = NSNumberFormatter()
+    formatter.locale = NSLocale.systemLocale()
+    return formatter
+    }()
 
 public enum JSON {
     case JSONDictionary([String:JSON])
@@ -97,12 +102,23 @@ public enum JSON {
         return self.value() as String?
     }
     
+    public func asNumber() -> NSNumber? {
+        switch self {
+        case let .JSONString(v):
+            return numberFormatter.numberFromString(v)
+        case let .JSONNumber(v):
+            return v
+        default:
+            return nil
+        }
+    }
+    
     public func asDouble() -> Double? {
-        return self.value() as Double?
+        return asNumber()?.doubleValue
     }
     
     public func asFloat() -> Float? {
-        return self.value() as Float?
+        return asNumber()?.floatValue
     }
     
     public func asBool() -> Bool? {
@@ -123,14 +139,14 @@ public enum JSON {
     
     
     public func asInt() -> Int? {
-        switch self {
-        case let .JSONString(v):
-            return v.toInt()
-        case let .JSONNumber(v):
-            return v.integerValue
-        default:
-            return nil
+        return asNumber()?.integerValue
+    }
+    
+    public func asUInt() -> UInt? {
+        if let int = asNumber()?.unsignedIntegerValue {
+            return UInt(int)
         }
+        return nil
     }
     
     public subscript(key: String) -> JSON {

@@ -608,6 +608,12 @@ extension Int: JSONDecodable {
     }
 }
 
+extension UInt: JSONDecodable {
+    public static func decodeJSON(json:JSON) -> Result<UInt> {
+        return optionalSuccess(json.asUInt(),error: JSONDecoder.castError())
+    }
+}
+
 
 
 
