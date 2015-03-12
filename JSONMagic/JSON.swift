@@ -21,23 +21,22 @@ public enum JSON {
     case JSONNumber(NSNumber)
     case JSONNull
     
-    public init?(jsonData: NSData) {
+    public init(jsonData: NSData) {
         var error:NSErrorPointer = nil
-        if let json: AnyObject = NSJSONSerialization.JSONObjectWithData(jsonData, options: .AllowFragments, error: error) as AnyObject?  {
-            self = JSON(jsonObject:json)
+        if let jsonObject: AnyObject = NSJSONSerialization.JSONObjectWithData(jsonData, options: .AllowFragments, error: error) as AnyObject?  {
+            self = JSON(jsonObject:jsonObject)
         }
         else {
-            return nil
+            self = .JSONNull
         }
     }
     
-    public init?(jsonString: String) {
-        
-        if let json = JSON(jsonData:jsonString.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)!) {
-            self = json
+    public init(jsonString: String) {
+        if let data = jsonString.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true) {
+            self = JSON(jsonData:data)
         }
         else {
-            return nil
+            self = .JSONNull
         }
     }
     
@@ -64,6 +63,14 @@ public enum JSON {
         default:
             self = .JSONNull
         }
+    }
+    
+    public func serializedData(options:NSJSONWritingOptions = NSJSONWritingOptions(0)) -> NSData {
+        return NSJSONSerialization.dataWithJSONObject(self.asNSObject(), options: options, error: nil)!
+    }
+    
+    public func serializedString(options:NSJSONWritingOptions = NSJSONWritingOptions(0)) -> String {
+        return NSString(data: serializedData(options: options), encoding: NSUTF8StringEncoding)!
     }
     
     public func jsonValue() -> JSON? {
@@ -119,7 +126,7 @@ public enum JSON {
     
     public func asFloat() -> Float? {
         return asNumber()?.floatValue
-    }
+}
     
     public func asBool() -> Bool? {
         switch self {
