@@ -578,7 +578,7 @@ extension JSONDecoder {
 
 // Base types support
 
- extension String: JSONDecodable {
+extension String: JSONDecodable {
     public static func decodeJSON(json:JSON) -> Result<String> {
         return optionalSuccess(json.asString(),error: JSONDecoder.castError())
     }

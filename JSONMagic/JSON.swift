@@ -14,12 +14,27 @@ private let numberFormatter:NSNumberFormatter = {
     return formatter
     }()
 
-public enum JSON {
+public enum JSON : Printable {
     case JSONDictionary([String:JSON])
     case JSONArray([JSON])
     case JSONString(String)
     case JSONNumber(NSNumber)
     case JSONNull
+    
+    public var description:String {
+        switch self {
+        case let .JSONString(v):
+            return "JSONString(\(v))"
+        case let .JSONNumber(v):
+            return "JSONNumber(\(v))"
+        case let .JSONNull:
+            return "JSONNull"
+        case let .JSONArray(a):
+            return "JSONArray(\(a))"
+        case let .JSONDictionary(o):
+            return "JSONDictionary(\(o))"
+        }
+    }
     
     public init(jsonData: NSData) {
         var error:NSErrorPointer = nil
@@ -98,15 +113,30 @@ public enum JSON {
     }
     
     public func asArray() -> [JSON]? {
-        return self.value() as [JSON]?
+        return self.value()
     }
     
     public func asDictionary() -> [String:JSON]? {
-        return self.value() as [String:JSON]?
+        return self.value()
     }
     
     public func asString() -> String? {
-        return self.value() as String?
+        switch self {
+        case let .JSONString(v):
+            return v
+        case let .JSONNumber(v):
+            return numberFormatter.stringFromNumber(v)
+        case let .JSONNull:
+            return nil
+        case let .JSONArray(a):
+            return nil
+        case let .JSONDictionary(o):
+            return nil
+        }
+    }
+    
+    public func asNSString() -> NSString? {
+        return self.value()
     }
     
     public func asNumber() -> NSNumber? {
