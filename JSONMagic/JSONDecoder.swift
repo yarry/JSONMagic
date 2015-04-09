@@ -7,7 +7,7 @@ import Foundation
 
 
 public protocol JSONDecodable {
-    class func decodeJSON(json:JSON) -> Result<Self>
+    static func decodeJSON(json:JSON) -> Result<Self>
 }
 
 public protocol JSONMutable {
@@ -37,6 +37,7 @@ public struct JSONDecoder {
     public init(_ json:JSON) {
         if let jsonDictionary = json.asDictionary() {
             self.json = jsonDictionary
+            self.error = nil
         }
         else {
             self.json = [:]
@@ -46,6 +47,7 @@ public struct JSONDecoder {
     
     public init(_ jsonDictionary:JSONDictionary) {
         self.json = jsonDictionary
+        self.error = nil
     }
     
     private init(_ json:JSONDictionary, error: NSError) {
@@ -55,11 +57,11 @@ public struct JSONDecoder {
     
     // result value
     
-    public func result<T>(result: @autoclosure() -> T) -> Result<T> {
+    public func result<T>(@autoclosure result: () -> T) -> Result<T> {
         return error != nil ? failure(error!) : success(result())
     }
     
-    public func result<T>(validate:()->Result<T>) -> Result<T> {
+    public func result<T>(@noescape validate:()->Result<T>) -> Result<T> {
         return error != nil ? failure(error!) : validate()
     }
     
@@ -195,7 +197,7 @@ extension JSONDecoder {
             }
         }
         else {
-            newContext = context
+            newContext = context as String
         }
         
         var userInfo = error.userInfo ?? [NSObject : AnyObject]()

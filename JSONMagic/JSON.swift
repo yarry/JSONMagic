@@ -85,7 +85,7 @@ public enum JSON : Printable {
     }
     
     public func serializedString(options:NSJSONWritingOptions = NSJSONWritingOptions(0)) -> String {
-        return NSString(data: serializedData(options: options), encoding: NSUTF8StringEncoding)!
+        return NSString(data: serializedData(options: options), encoding: NSUTF8StringEncoding)! as String
     }
     
     public func jsonValue() -> JSON? {
