@@ -64,6 +64,23 @@ public struct JSONDecoder {
     public func result<T>(@noescape validate:()->Result<T>) -> Result<T> {
         return error != nil ? failure(error!) : validate()
     }
+
+    public func process(@noescape process:()->Result<Void>) -> JSONDecoder {
+        if error != nil {
+            return self
+        }
+        else {
+            let result = process()
+            switch(result) {
+            case .Success(let decoded):
+                return self
+            case .Failure(let error):
+                return JSONDecoder(json,error:error)
+            default:
+                return JSONDecoder(json,error:JSONDecoder.unknownError())
+            }
+        }
+    }
     
     // Binding with transform processors
     
