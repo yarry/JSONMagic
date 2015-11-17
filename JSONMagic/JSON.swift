@@ -14,7 +14,7 @@ private let numberFormatter:NSNumberFormatter = {
     return formatter
     }()
 
-public enum JSON : Printable {
+public enum JSON : CustomStringConvertible {
     case JSONDictionary([String:JSON])
     case JSONArray([JSON])
     case JSONString(String)
@@ -27,7 +27,7 @@ public enum JSON : Printable {
             return "JSONString(\(v))"
         case let .JSONNumber(v):
             return "JSONNumber(\(v))"
-        case let .JSONNull:
+        case .JSONNull:
             return "JSONNull"
         case let .JSONArray(a):
             return "JSONArray(\(a))"
@@ -37,13 +37,12 @@ public enum JSON : Printable {
     }
     
     public init(jsonData: NSData) {
-        var error:NSErrorPointer = nil
-        if let jsonObject: AnyObject = NSJSONSerialization.JSONObjectWithData(jsonData, options: .AllowFragments, error: error) as AnyObject?  {
-            self = JSON(jsonObject:jsonObject)
-        }
-        else {
-            self = .JSONNull
-        }
+            if let jsonObject: AnyObject = (try? NSJSONSerialization.JSONObjectWithData(jsonData, options: .AllowFragments)) as AnyObject?  {
+                self = JSON(jsonObject:jsonObject)
+            }
+            else {
+                self = .JSONNull
+            }
     }
     
     public init(jsonString: String) {
@@ -80,12 +79,12 @@ public enum JSON : Printable {
         }
     }
     
-    public func serializedData(options:NSJSONWritingOptions = NSJSONWritingOptions(0)) -> NSData {
-        return NSJSONSerialization.dataWithJSONObject(self.asNSObject(), options: options, error: nil)!
+    public func serializedData(options:NSJSONWritingOptions = NSJSONWritingOptions(rawValue: 0)) -> NSData {
+        return try! NSJSONSerialization.dataWithJSONObject(self.asNSObject(), options: options)
     }
     
-    public func serializedString(options:NSJSONWritingOptions = NSJSONWritingOptions(0)) -> String {
-        return NSString(data: serializedData(options: options), encoding: NSUTF8StringEncoding)! as String
+    public func serializedString(options:NSJSONWritingOptions = NSJSONWritingOptions(rawValue: 0)) -> String {
+        return NSString(data: serializedData(options), encoding: NSUTF8StringEncoding)! as String
     }
     
     public func jsonValue() -> JSON? {
@@ -161,7 +160,7 @@ public enum JSON : Printable {
     public func asBool() -> Bool? {
         switch self {
         case let .JSONString(v):
-            if let int =  v.toInt() {
+            if let int =  Int(v) {
                 return int != 0
             }
             else {
@@ -228,7 +227,7 @@ public enum JSON : Printable {
         case let .JSONArray(a):
             return a.map{ $0.asNSObject() }
         case let .JSONDictionary(o):
-            return reduce(o, [String:AnyObject]()) { dict, pair in
+            return o.reduce([String:AnyObject]()) { dict, pair in
                 var d = dict
                 d[pair.0] = pair.1.asNSObject()
                 return d

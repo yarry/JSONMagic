@@ -205,7 +205,7 @@ extension JSONDecoder {
     private static func addContextToError(error:NSError,context:NSString) -> NSError {
         
         var newContext:String
-        if let keypath = error.userInfo?[kJSONDecoderErrorPath] as? String {
+        if let keypath = error.userInfo[kJSONDecoderErrorPath] as? String {
             if keypath.hasPrefix("[") {
                 newContext = context.stringByAppendingString(keypath)
             }
@@ -248,7 +248,7 @@ public func decodeJSONArray<T>(json:JSON, transform: (JSON)->Result<T>) -> Resul
         var results = [T]()
         results.reserveCapacity(jsonArray.count)
         
-        for (index,jsonElement) in enumerate(jsonArray) {
+        for (index,jsonElement) in jsonArray.enumerate() {
             let result:Result<T> = transform(jsonElement)
             
             switch result {
@@ -349,7 +349,7 @@ public func mutateByJSON<T:JSONMutable>(inout value:T, json:JSON) -> Result<T> {
 // Decoding arrays
 
 public func decodeJSON<T>(json:JSON, transform: (JSON)->Result<T>) -> Result<Array<T>> {
-    return decodeJSONArray(json, transform)
+    return decodeJSONArray(json, transform: transform)
 }
 
 public func decodeJSON<T:JSONDecodable>(json:JSON) -> Result<Array<T>> {
@@ -382,7 +382,7 @@ public extension JSONDecoder {
     // optional bind mutable
     
     public func optionalBind<T:JSONMutable>(inout value:T,_ key:String, fallback:T) -> JSONDecoder {
-        return optionalBind(&value,key,fallback:fallback) { (json:JSON) -> Result<T> in return mutateByJSON(&value,json) }
+        return optionalBind(&value,key,fallback:fallback) { (json:JSON) -> Result<T> in return mutateByJSON(&value,json: json) }
     }
     
     public func optionalBind<T:JSONMutableDecodable>(inout value:T!,_ key:String, fallback:T) -> JSONDecoder {
@@ -466,7 +466,7 @@ public extension JSONDecoder {
     // bind mutable
     
     public func bind<T:JSONMutable>(inout value:T,_ key:String) -> JSONDecoder {
-        return bind(&value,key) { (json:JSON) -> Result<T> in return mutateByJSON(&value,json) }
+        return bind(&value,key) { (json:JSON) -> Result<T> in return mutateByJSON(&value,json: json) }
     }
     
     public func bind<T:JSONMutableDecodable>(inout value:T!,_ key:String) -> JSONDecoder {
@@ -522,75 +522,75 @@ public func mapJSON<V:JSONMutableDecodable,T>(json:JSON, transform: (V)->T) -> R
 extension JSONDecoder {
     
     public func bind<T,V:JSONDecodable>(inout value:T,_ key:String, transform:(V)->Result<T>) -> JSONDecoder {
-        return bind(&value,key) { mapJSON($0,transform) }
+        return bind(&value,key) { mapJSON($0,transform: transform) }
     }
     
     public func bind<T,V:JSONDecodable>(inout value:T,_ key:String, transform:(V)->T) -> JSONDecoder {
-        return bind(&value,key) { mapJSON($0,transform) }
+        return bind(&value,key) { mapJSON($0,transform: transform) }
     }
     
     public func bind<T,V:JSONDecodable>(inout value:T,_ key:String, transform:(V)->T?) -> JSONDecoder {
-        return bind(&value,key) { mapJSON($0,transform) }
+        return bind(&value,key) { mapJSON($0,transform: transform) }
     }
     
     public func bind<T,V:JSONDecodable>(inout value:T!,_ key:String, transform:(V)->Result<T>) -> JSONDecoder {
-        return bind(&value,key) { mapJSON($0,transform) }
+        return bind(&value,key) { mapJSON($0,transform: transform) }
     }
     
     public func bind<T,V:JSONDecodable>(inout value:T!,_ key:String, transform:(V)->T) -> JSONDecoder {
-        return bind(&value,key) { mapJSON($0,transform) }
+        return bind(&value,key) { mapJSON($0,transform: transform) }
     }
     
     public func bind<T,V:JSONDecodable>(inout value:T!,_ key:String, transform:(V)->T?) -> JSONDecoder {
-        return bind(&value,key) { mapJSON($0,transform) }
+        return bind(&value,key) { mapJSON($0,transform: transform) }
     }
     
     public func bind<T,V:JSONDecodable>(inout value:T?,_ key:String, transform:(V)->Result<T>) -> JSONDecoder {
-        return bind(&value,key) { mapJSON($0,transform) }
+        return bind(&value,key) { mapJSON($0,transform: transform) }
     }
     
     public func bind<T,V:JSONDecodable>(inout value:T?,_ key:String, transform:(V)->T) -> JSONDecoder {
-        return bind(&value,key) { mapJSON($0,transform) }
+        return bind(&value,key) { mapJSON($0,transform: transform) }
     }
     
     public func bind<T,V:JSONDecodable>(inout value:T?,_ key:String, transform:(V)->T?) -> JSONDecoder {
-        return bind(&value,key) { mapJSON($0,transform) }
+        return bind(&value,key) { mapJSON($0,transform: transform) }
     }
     
     public func optionalBind<T,V:JSONDecodable>(inout value:T,_ key:String, fallback:T, transform:(V)->Result<T>) -> JSONDecoder {
-        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform) }
+        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform: transform) }
     }
     
     public func optionalBind<T,V:JSONDecodable>(inout value:T,_ key:String, fallback:T, transform:(V)->T) -> JSONDecoder {
-        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform) }
+        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform: transform) }
     }
     
     public func optionalBind<T,V:JSONDecodable>(inout value:T,_ key:String, fallback:T, transform:(V)->T?) -> JSONDecoder {
-        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform) }
+        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform: transform) }
     }
     
     public func optionalBind<T,V:JSONDecodable>(inout value:T!,_ key:String, fallback:T, transform:(V)->Result<T>) -> JSONDecoder {
-        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform) }
+        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform: transform) }
     }
     
     public func optionalBind<T,V:JSONDecodable>(inout value:T!,_ key:String, fallback:T, transform:(V)->T) -> JSONDecoder {
-        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform) }
+        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform: transform) }
     }
     
     public func optionalBind<T,V:JSONDecodable>(inout value:T!,_ key:String, fallback:T, transform:(V)->T?) -> JSONDecoder {
-        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform) }
+        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform: transform) }
     }
     
     public func optionalBind<T,V:JSONDecodable>(inout value:T?,_ key:String, fallback:T? = nil, transform:(V)->Result<T>) -> JSONDecoder {
-        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform) }
+        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform: transform) }
     }
     
     public func optionalBind<T,V:JSONDecodable>(inout value:T?,_ key:String, fallback:T? = nil, transform:(V)->T) -> JSONDecoder {
-        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform) }
+        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform: transform) }
     }
     
     public func optionalBind<T,V:JSONDecodable>(inout value:T?,_ key:String, fallback:T? = nil, transform:(V)->T?) -> JSONDecoder {
-        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform) }
+        return optionalBind(&value,key,fallback:fallback) { mapJSON($0,transform: transform) }
     }
 }
 
